@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Hackathon</title>
+	<script src="jquery.min.js"></script>
+	<script>
+		(function() {
+		  $(function() {
+			
+			var canvas, draw, get_animation_frame, paused;
+			canvas = document.getElementById('game-canvas');
+			canvas.width = 640;
+			canvas.height = 240;
+			context = canvas.getContext('2d');
+			paused = true;
+			
+			var player1 = 0;
+			var player2 = 0;
+			var ball = {
+				position_x: 20,
+				position_y: 20,
+				velocity_x: 400,
+				velocity_y: 400,
+				speed: 2
+			};
+				
+			ball_image = new Image();
+			ball_image.src = "ball.png";
+			
+			var player1_score = 0;
+			var player2_score = 0;
+			
+			get_animation_frame = function() {
+			  return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback, element) {
+				return window.setTimeout(callback, 1000 / 60);
+			  };
+			};
+			
+			window.addEventListener('keypress', function(event) {
+			switch(event.keyCode) 
+					{
+						case 13:
+							$(".ready").hide();
+							paused = false;
+						case 115:
+							if (player1 < 180) player1 += 10;
+							break;
+						case 119:
+							if (player1 > 0) player1 -= 10;
+							break;
+					}
+			});
+						
+			draw = function(timestamp) {	
+				if (!paused) {
+					$(".player1").text("Score: " + player1_score);
+					$(".player2").text("Score: " + player2_score);
+					
+					if (ball.velocity_y > 0) ball.position_y+= ball.speed;
+					if (ball.velocity_x > 0) ball.position_x+= ball.speed;
+					
+					if (ball.velocity_y < 0) ball.position_y-= ball.speed;
+					if (ball.velocity_x < 0) ball.position_x-= ball.speed;
+					
+					if (ball.position_y > 228 || ball.position_y < 12) ball.velocity_y = -ball.velocity_y;
+					
+					if (ball.position_x > 652) {
+						player1_score++;
+						
+						ball.position_x = 640 / 2;
+						ball.position_y = 240 / 2;
+						
+						ball.velocity_x = -ball.velocity_x;
+					}
+					
+					if  (ball.position_x < -12) { 
+						player2_score++;
+						
+						ball.position_x = 640 / 2;
+						ball.position_y = 240 / 2;
+						
+						ball.velocity_x = -ball.velocity_x; 					
+					}
+
+					if ((ball.position_y < player1 + 60) && (ball.position_x < 21)) {
+						ball.velocity_x = -ball.velocity_x;
+					}
+					
+					if ((ball.position_y < player2 + 60) && (ball.position_x > 618)) {
+						ball.velocity_x = -ball.velocity_x;
+					}
+					
+					if (player2 < ball.position_y) player2++;
+					if (player2 > ball.position_y) player2--;
+					
+					//console.log("X:" + ball.position_x + " Y:" + ball.position_y);
+					//console.log("Veloctiy X:" + ball.velocity_x + " Velocity Y:" + ball.velocity_y); 
+					context.clearRect(0,0,640,480);
+					
+					context.fillStyle = "#336699";
+					context.fillRect(0,player1,10,60);
+					context.fillRect(630,player2,10,60);
+					
+					
+					context.save();
+					context.translate(-12, -12);
+					
+					context.drawImage(ball_image, ball.position_x, ball.position_y, 24, 24);
+					
+					context.restore();
+				}
+			  return get_animation_frame()(draw, canvas);
+			};
+			return draw();
+		  });
+		}).call(this);
+		
+	</script>
+	<style>
+	
+		body {
+			color: gray;
+		}
+		
+		.score {
+			width: 640;
+			font-size: 70%;
+			color: gray;
+		}
+		
+		.player1 {
+			float:left;
+			width: 60px;
+		}
+		
+		.player2 {
+			margin-left: 580px;
+			text-align: right;
+			width: 60px;
+		}
+		
+		.ready {
+			position: absolute;
+			top: 100px;
+			left: 200px;
+		}
+	</style>
+</head>
+<body>
+
+  <header>
+    <h1>Twilio Pong</h1>
+  </header>
+	<div class="ready"><h1>Press Enter To Play</h1></div>
+	<div class="score">
+		<div class="player1">Score:</div>
+		<div class="player2">Score:</div>
+	</div>
+	<canvas id="game-canvas" width="640" height="480">
+		Arghh! Canvas not supported...
+	</canvas>
+
+</body>
+</html>
